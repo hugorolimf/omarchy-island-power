@@ -42,7 +42,9 @@ var en = {
  "Poupa bateria e reduz o desempenho": "Saves battery and lowers performance",
  "Equilíbrio entre desempenho e consumo": "Balances performance and power use",
  "Desempenho máximo do sistema": "Full system performance",
- "Limite de potência do firmware (só na tomada)": "Firmware power limit (plugged in only)"
+ "Limite de potência do firmware (só na tomada)": "Firmware power limit (plugged in only)",
+ "Manter acordado": "Stay awake",
+ "Sem bloqueio nem proteção de tela": "No lock screen or screensaver"
 }
 
 function T(s) { return english && en[s] !== undefined ? en[s] : s }

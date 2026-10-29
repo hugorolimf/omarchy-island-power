@@ -107,6 +107,20 @@ Panel {
 
   // Cute agent-flavored phrases shown in the hero status line, rotated on a
   // timer so the panel feels alive when current is flowing (either direction).
+  // Stay awake (was a bar indicator), through the idle service's IPC since
+  // widgets get no first-party services; read again on every open.
+  property bool stayAwake: false
+  function setStayAwake(on) {
+    stayAwake = on
+    Quickshell.execDetached(["omarchy-shell", "idle", on ? "disable" : "enable"])
+  }
+  Process {
+    id: idleProc
+    command: ["omarchy-shell", "idle", "status"]
+    stdout: StdioCollector {
+      onStreamFinished: { try { root.stayAwake = JSON.parse(text).stayAwake === true } catch (e) {} }
+    }
+  }
   readonly property var chargingPhrases: [
     Strings.T("Bombeando energia"),
     Strings.T("Injetando elétrons"),
@@ -201,6 +215,7 @@ Panel {
 
   onOpenedChanged: {
     if (opened) {
+      idleProc.running = true
       if (!batteryPresent) {
         close()
         return
@@ -581,6 +596,18 @@ Panel {
               }
             }
           }
+        }
+
+        // ---------- Stay awake (was a bar indicator) ----------
+        PanelSeparator {
+        }
+
+        Toggle {
+          width: parent.width
+          label: Strings.T("Manter acordado")
+          description: Strings.T("Sem bloqueio nem proteção de tela")
+          checked: root.stayAwake
+          onClicked: root.setStayAwake(!checked)
         }
       }
     }
