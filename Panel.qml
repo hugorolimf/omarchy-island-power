@@ -397,6 +397,7 @@ Panel {
             spacing: Style.space(2)
 
             Text {
+              textFormat: Text.PlainText
               text: Strings.T("Bateria")
               color: Anatomy.strong
               font.family: Anatomy.sans
