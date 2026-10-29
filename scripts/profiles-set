@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Wraps omarchy-powerprofiles-set. max-power is written straight to the
+# platform profile (needs /etc/udev/rules.d/99-hugo-platform-profile.rules)
+# and is not remembered, so replugging AC falls back to the saved profile.
+
+action="${1:-autodetect}"
+profile="${2:-}"
+
+platform_profile=/sys/class/platform-profile/platform-profile-0/profile
+
+if [[ $profile == max-power ]]; then
+  [[ $action != battery ]] || {
+    echo "Extreme mode is only available on AC power" >&2
+    exit 1
+  }
+  # Go through performance first so power-profiles-daemon is in its closest state.
+  powerprofilesctl set performance 2>/dev/null
+  printf 'max-power\n' >"$platform_profile"
+  exit
+fi
+
+# Leaving max-power: power-profiles-daemon still believes it is in performance
+# and would skip the write, so reset the firmware profile ourselves first.
+if [[ -w $platform_profile && $(<"$platform_profile") == max-power ]]; then
+  printf 'performance\n' >"$platform_profile"
+fi
+
+exec omarchy-powerprofiles-set "$@"

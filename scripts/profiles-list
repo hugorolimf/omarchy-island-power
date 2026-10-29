@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Wraps omarchy-powerprofiles-list and appends the firmware's max-power
+# (Lenovo "Extreme") profile, which power-profiles-daemon does not expose.
+# Output matches omarchy-powerprofiles-list [--active-state].
+
+platform_profile=/sys/class/platform-profile/platform-profile-0
+
+list=$(omarchy-powerprofiles-list "$@")
+
+extreme_available() {
+  [[ -w $platform_profile/profile ]] &&
+    [[ " $(<"$platform_profile/choices") " == *" max-power "* ]] &&
+    [[ $(</sys/class/power_supply/ADP0/online) == 1 ]]
+}
+
+if ! extreme_available; then
+  printf '%s\n' "$list"
+  exit 0
+fi
+
+if [[ ${1:-} == "--active-state" ]]; then
+  if [[ $(<"$platform_profile/profile") == max-power ]]; then
+    # power-profiles-daemon still reports performance; max-power wins.
+    printf '%s\n' "$list" | awk -F'\t' '{ print $1 "\t0" }'
+    printf 'max-power\t1\n'
+  else
+    printf '%s\n' "$list"
+    printf 'max-power\t0\n'
+  fi
+else
+  printf '%s\n' "$list"
+  printf 'max-power\n'
+fi

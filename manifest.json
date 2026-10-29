@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.hugorolimf.power",
+  "name": "Island Power",
+  "version": "1.0.0",
+  "author": "Hugo Rolim Filho",
+  "license": "MIT",
+  "homepage": "https://github.com/hugorolimf/omarchy-island-power",
+  "description": "Battery, power profile, and system stats, in the Island look (stroke icons, anatomy panel), in English or Portuguese",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Island Power",
+    "description": "Battery, power profile, and system stats",
+    "category": "System",
+    "allowMultiple": false
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.power"
+  }
+}
