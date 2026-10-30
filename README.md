@@ -18,6 +18,15 @@ Battery, charge limit, power profiles and system stats, drawn with thin stroke i
 - 🔄 **Drop-in.** It's Omarchy's own `omarchy.power` underneath (same behaviour, same
   shortcuts and IPC): enabling it takes the original's place on the bar.
 
+## See it
+
+Recorded on a real desktop, mouse and clicks included. The panel follows the
+system language; this take is in Portuguese.
+
+**Power modes and Stay awake**: pick a mode and the panel says what it does; Stay awake glows amber while the screen won't lock.
+
+![Power modes and Stay awake](assets/power.gif)
+
 ## Requirements
 
 [Island Kit](https://github.com/hugorolimf/omarchy-island-kit): the panel is drawn with it.
