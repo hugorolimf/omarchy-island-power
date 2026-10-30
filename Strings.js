@@ -44,7 +44,11 @@ var en = {
  "Desempenho máximo do sistema": "Full system performance",
  "Limite de potência do firmware (só na tomada)": "Firmware power limit (plugged in only)",
  "Manter acordado": "Stay awake",
- "Sem bloqueio nem proteção de tela": "No lock screen or screensaver"
+ "Sem bloqueio nem proteção de tela": "No lock screen or screensaver",
+ "LIGADO": "ON",
+ "DESLIGADO": "OFF",
+ "A tela não bloqueia nem apaga sozinha.": "The screen will not lock or turn off by itself.",
+ "A tela bloqueia e descansa quando você se afasta.": "The screen locks and rests when you step away."
 }
 
 function T(s) { return english && en[s] !== undefined ? en[s] : s }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.hugorolimf.power",
   "name": "Island Power",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "Hugo Rolim Filho",
   "license": "MIT",
   "homepage": "https://github.com/hugorolimf/omarchy-island-power",
@@ -11,7 +11,7 @@
     "bar-widget"
   ],
   "entryPoints": {
-    "barWidget": "Panel.qml"
+    "barWidget": "Entry.qml"
   },
   "barWidget": {
     "displayName": "Island Power",

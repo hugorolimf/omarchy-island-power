@@ -318,6 +318,10 @@ Panel {
     }
   }
 
+  // the panel's height follows its content smoothly while open
+  property real panelHeight: column.implicitHeight
+  Behavior on panelHeight { enabled: root.opened; NumberAnimation { duration: 280; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
+
   KeyboardPanel {
     id: panel
     anchorItem: button
@@ -326,7 +330,7 @@ Panel {
     open: root.opened && root.batteryPresent
     focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(380))
-    contentHeight: panel.fittedContentHeight(column.implicitHeight)
+    contentHeight: panel.fittedContentHeight(root.panelHeight)
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -377,8 +381,13 @@ Panel {
               Behavior on color { ColorAnimation { duration: Anatomy.fast } }
             }
 
+            // the bolt fades in as the cable goes in, and out as it leaves
             AnatomyIcon {
-              visible: root.charging
+              visible: opacity > 0.01
+              opacity: root.charging ? 1 : 0
+              scale: root.charging ? 1 : 0.6
+              Behavior on opacity { NumberAnimation { duration: Anatomy.base; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
+              Behavior on scale { NumberAnimation { duration: Anatomy.base; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
               anchors.fill: parent
               path: Anatomy.icons.bolt
               size: heroIcon.size
@@ -523,6 +532,22 @@ Panel {
             radius: Anatomy.rowRadius
             color: Anatomy.faint
 
+            // the lifted card slides to the chosen mode instead of jumping
+            Rectangle {
+              id: profileThumb
+              readonly property int activeIndex: root.profiles.indexOf(root.activeProfile)
+              visible: activeIndex >= 0 && profileRow.cellWidth > 0
+              x: 2 + Math.max(0, activeIndex) * (profileRow.cellWidth + profileRow.spacing)
+              y: 2
+              width: profileRow.cellWidth
+              height: profileRow.height
+              radius: Anatomy.chipRadius
+              color: Anatomy.card
+              Behavior on x { NumberAnimation { duration: 380; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
+              AnatomyLift { radius: profileThumb.radius; depth: 3 }
+              AnatomyLift { radius: profileThumb.radius; inner: true }
+            }
+
             Row {
               id: profileRow
               x: 2
@@ -549,15 +574,12 @@ Panel {
                   width: profileRow.cellWidth
                   implicitHeight: chipLabel.implicitHeight + Style.space(12)
                   radius: Anatomy.chipRadius
-                  color: isActive ? Anatomy.card : (hasCursor ? Anatomy.hover : "transparent")
+                  color: hasCursor && !isActive ? Anatomy.hover : "transparent"
                   borderSpec: Border.none()
                   border.width: hasCursor && isActive ? Anatomy.hairline : 0
                   border.color: Anatomy.selectedRim
 
                   Behavior on color { ColorAnimation { duration: Anatomy.fast; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
-
-                  AnatomyLift { visible: chip.isActive; radius: chip.radius; depth: 3 }
-                  AnatomyLift { visible: chip.isActive; radius: chip.radius; inner: true }
 
                   Text {
                     id: chipLabel
@@ -597,18 +619,66 @@ Panel {
               }
             }
           }
+          // what the chosen mode does, in words; a new one cross-fades in
+          Item {
+            id: profileWords
+            width: parent.width
+            height: wordsA.implicitHeight
+            property bool showA: true
+            property string shown: ""
+            readonly property string want: root.activeProfile !== "" ? Model.profileHint(root.activeProfile) + "." : ""
+            onWantChanged: {
+              if (want === shown) return
+              shown = want
+              if (showA) wordsB.text = want
+              else wordsA.text = want
+              showA = !showA
+            }
+            Component.onCompleted: { wordsA.text = want; shown = want }
+            Text {
+              id: wordsA
+              textFormat: Text.PlainText
+              width: parent.width
+              color: Anatomy.muted
+              font.family: Anatomy.sans
+              font.pixelSize: 11
+              elide: Text.ElideRight
+              opacity: profileWords.showA ? 1 : 0
+              Behavior on opacity { NumberAnimation { duration: 240; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
+            }
+            Text {
+              id: wordsB
+              textFormat: Text.PlainText
+              width: parent.width
+              color: Anatomy.muted
+              font.family: Anatomy.sans
+              font.pixelSize: 11
+              elide: Text.ElideRight
+              opacity: profileWords.showA ? 0 : 1
+              Behavior on opacity { NumberAnimation { duration: 240; easing.type: Easing.Bezier; easing.bezierCurve: Anatomy.ease } }
+            }
+          }
         }
 
         // ---------- Stay awake (was a bar indicator) ----------
         PanelSeparator {
         }
 
-        Toggle {
+        // said in words: an open eye keeps the screen awake (amber: it costs
+        // battery); off, the eye is slashed and the screen may lock and rest
+        StateHero {
           width: parent.width
-          label: Strings.T("Manter acordado")
-          description: Strings.T("Sem bloqueio nem proteção de tela")
+          title: Strings.T("Manter acordado")
+          stateText: root.stayAwake ? Strings.T("LIGADO") : Strings.T("DESLIGADO")
+          detail: root.stayAwake ? Strings.T("A tela não bloqueia nem apaga sozinha.")
+            : Strings.T("A tela bloqueia e descansa quando você se afasta.")
+          iconPath: "M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12zM9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0"
+          iconColor: Anatomy.mid
+          marked: !root.stayAwake
           checked: root.stayAwake
-          onClicked: root.setStayAwake(!checked)
+          alert: root.stayAwake
+          tone: Anatomy.amber
+          onToggled: root.setStayAwake(!root.stayAwake)
         }
       }
     }
